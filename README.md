@@ -4,6 +4,11 @@ Too many saved items in Pocket?
 Randomly pick up something to read ... I'm feeling lucky!!
 
 
+Screenshot
+----------
+![pocket-random screnshot](https://raw.github.com/dannvix/pocket-random/master/docs/screenshot.png)
+
+
 Dependencies
 ------------
 * Python 2.x
