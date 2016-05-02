@@ -140,7 +140,7 @@ if __name__ == '__main__':
             item_title = picked_item.get('resolved_title').encode('utf8')
             item_url = picked_item.get('resolved_url').encode('utf8')
             print('')
-            print('Item #{item_id} - "{item_title}"({item_url})'.format(
+            print('Item #{item_id} - "{item_title}" {item_url}'.format(
                 item_id=item_id, item_title=item_title, item_url=item_url))
 
             while True:
