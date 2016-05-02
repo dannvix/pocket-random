@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# encoding: utf-8
 # pocket-random.py -- randomly pick up some items from Pocket
 
 # Copyright (c) 2016 Shao-Chung Chen
@@ -27,8 +28,67 @@ import random
 import sys
 import time
 import webbrowser
+from datetime import datetime
 
 import requests
+
+# blessings
+try:
+    from blessings import Terminal
+except ImportError:
+    # fallback
+    class Terminal(object):
+        def __getattr__(self, name):
+            if name == 'width': return 100
+            elif name == 'height': return 24
+            def _missing(*args, **kwargs):
+                return ''.join(args) or None
+            return _missing
+
+
+# human-friendly date
+# ref. http://stackoverflow.com/a/1551394
+def pretty_date(timestamp=None):
+    now = datetime.now()
+    if type(timestamp) is int:
+        diff = now - datetime.fromtimestamp(timestamp)
+    elif isinstance(timestamp, datetime):
+        diff = now - timestamp
+    elif not None:
+        diff = now - now
+
+    day_diff = diff.days
+    if day_diff < 0:
+        return 'from the future!'
+    elif day_diff == 0:
+        second_diff = diff.seconds
+        if second_diff < 60:
+            return 'few seconds ago'
+        if second_diff < 120:
+            return 'a minute ago'
+        if second_diff < 3600:
+            return str(second_diff / 60) + ' minutes ago'
+        if second_diff < 7200:
+            return 'an hour ago'
+        if second_diff < 86400:
+            return str(second_diff / 3600) + ' hours ago'
+    elif day_diff == 1:
+        return "yesterday"
+    elif day_diff < 7:
+        return str(day_diff) + ' days ago'
+    elif day_diff < 31:
+        return str(day_diff / 7) + ' weeks ago'
+    elif day_diff < 365:
+        return str(day_diff / 30) + ' months ago'
+    return str(day_diff / 365) + ' years ago'
+
+
+# truncate string
+def truncate(string, width):
+    if len(string) > width:
+      return u'{truncated}…'.format(truncated=string[:width-1])
+    return string
+
 
 # API configurations
 API_BASE = 'https://getpocket.com/v3/'
@@ -65,6 +125,9 @@ class UserConfig(object):
 
 
 if __name__ == '__main__':
+    # colored terminal output
+    t = Terminal()
+
     # config
     cfg = UserConfig()
 
@@ -119,9 +182,8 @@ if __name__ == '__main__':
         cfg.save()
 
     if cfg.api_key and cfg.user_code and cfg.user_token:
-        print('Hello {username}!'.format(username=cfg.username))
-        print('')
-        print('Retrieving items from Pocket...')
+        print(t.yellow('Hello {username}!'.format(username=cfg.username)))
+        sys.stdout.write('Retrieving items from Pocket... '); sys.stdout.flush()
         # FIXME: retrieve items in small batches (API limitation = 5000 items for each requests)
         # FIXME: save the retrieved data if possible
         request_url = '{api_base}get'.format(api_base=API_BASE)
@@ -134,17 +196,26 @@ if __name__ == '__main__':
         item_count = len(items)
         print('{item_count} items retrieved!'.format(item_count=item_count))
 
-        while True:
-            picked_item = random.choice(items)
+        random.shuffle(items)
+        while items:
+            picked_item = items.pop(0)
             item_id = picked_item.get('item_id')
-            item_title = picked_item.get('resolved_title').encode('utf8')
-            item_url = picked_item.get('resolved_url').encode('utf8')
-            print('')
-            print('Item #{item_id} - "{item_title}" {item_url}'.format(
-                item_id=item_id, item_title=item_title, item_url=item_url))
+            item_title = picked_item.get('resolved_title')
+            item_url = picked_item.get('resolved_url')
+            item_timestamp = int(picked_item.get('time_added', 0))
+
+            id_field = t.yellow(u'[#{id}]'.format(id=item_id))
+            title_field = t.white(u'"{title}"'.format(title=item_title))
+            url_field = t.green(u'{url}'.format(url=truncate(item_url, t.width)))
+            date_field = t.blue(u'Added at {date}'.format(date=pretty_date(item_timestamp)))
+
+            print(u'')
+            print(u'{id} {title}'.format(id=id_field, title=title_field))
+            print(u'{url}'.format(url=url_field))
+            print(u'{date}'.format(date=date_field))
 
             while True:
-                answer = raw_input('Action? open(o), archive(a), next(n), quit(q)? ').lower()
+                answer = raw_input('Action> open(o), archive(a), next(n), quit(q) ? ').lower()
                 if answer in ['o', 'open']:
                     webbrowser.open(item_url)
                 elif answer in ['n', 'next']:
@@ -158,12 +229,11 @@ if __name__ == '__main__':
                         'access_token': cfg.user_token,
                         'actions': json.dumps([{
                             'action': 'archive',
-                            'item_id': item_id,
-                            'time': int(time.time())}])}
+                            'item_id': item_id}])}
                     response = requests.get(request_url, params=request_data)
                     if response.status_code != requests.codes.ok:
                         raise Exception('archive item error, status_code=[{status_code}], X-Error-Code=[{xerror}]'.format(
                             status_code=response.status_code, xerror=response.headers.get('X-Error-Code')))
                     else:
-                        print('Item #{item_id} archived'.format(item_id=item_id))
+                        print('Item #{item_id} archived :-)'.format(item_id=item_id))
                     break
