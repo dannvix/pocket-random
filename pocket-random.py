@@ -201,7 +201,7 @@ if __name__ == '__main__':
             picked_item = items.pop(0)
             item_id = picked_item.get('item_id')
             item_title = picked_item.get('resolved_title')
-            item_url = picked_item.get('resolved_url')
+            item_url = picked_item.get('resolved_url', '')
             item_timestamp = int(picked_item.get('time_added', 0))
 
             id_field = t.yellow(u'[#{id}]'.format(id=item_id))
