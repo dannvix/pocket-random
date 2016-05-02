@@ -214,26 +214,34 @@ if __name__ == '__main__':
             print(u'{url}'.format(url=url_field))
             print(u'{date}'.format(date=date_field))
 
+            # FIXME: kinda dirty
+            def _item_action(action):
+                assert(action == 'archive' or action == 'delete')
+                request_url = '{api_base}send'.format(api_base=API_BASE)
+                request_data = {
+                    'consumer_key': cfg.api_key,
+                    'access_token': cfg.user_token,
+                    'actions': json.dumps([{
+                        'action': action,
+                        'item_id': item_id}])}
+                response = requests.get(request_url, params=request_data)
+                if response.status_code != requests.codes.ok:
+                    raise Exception('archive item error, status_code=[{status_code}], X-Error-Code=[{xerror}]'.format(
+                        status_code=response.status_code, xerror=response.headers.get('X-Error-Code')))
+                else:
+                    print('Item #{id} {action}d :-)'.format(id=item_id, action=action))
+
             while True:
-                answer = raw_input('Action> open(o), archive(a), next(n), quit(q) ? ').lower()
+                answer = raw_input('Action> open(o), archive(a), delete(d), next(n), quit(q) ? ').lower()
                 if answer in ['o', 'open']:
                     webbrowser.open(item_url)
                 elif answer in ['n', 'next']:
                     break
                 elif answer in ['q', 'quit']:
                     sys.exit(0)
+                elif answer in ['d', 'delete']:
+                    _item_action('delete')
+                    break
                 elif answer in ['a', 'archive']:
-                    request_url = '{api_base}send'.format(api_base=API_BASE)
-                    request_data = {
-                        'consumer_key': cfg.api_key,
-                        'access_token': cfg.user_token,
-                        'actions': json.dumps([{
-                            'action': 'archive',
-                            'item_id': item_id}])}
-                    response = requests.get(request_url, params=request_data)
-                    if response.status_code != requests.codes.ok:
-                        raise Exception('archive item error, status_code=[{status_code}], X-Error-Code=[{xerror}]'.format(
-                            status_code=response.status_code, xerror=response.headers.get('X-Error-Code')))
-                    else:
-                        print('Item #{item_id} archived :-)'.format(item_id=item_id))
+                    _item_action('archive')
                     break
