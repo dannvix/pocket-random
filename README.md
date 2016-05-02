@@ -11,9 +11,10 @@ Screenshot
 
 Dependencies
 ------------
-* Python 2.x
+* Python 2.7 and later
 * Python packages
   - [`requests`](http://docs.python-requests.org/)
+  - [`blessings`](https://github.com/erikrose/blessings) (optional)
 
 
 License
