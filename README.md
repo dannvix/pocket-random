@@ -17,6 +17,18 @@ Dependencies
   - [`blessings`](https://github.com/erikrose/blessings) (optional)
 
 
+Usage
+-----
+1. Create your own app on [Pocket Developer Site](https://getpocket.com/developer/apps/)
+2. Follow the script instruction to enter API keys and finish OAuth authorization
+3. Enjoy reading!!
+
+
+Note
+----
+Authorized Pocket credential would be stored in `~/.pocketrandom` (no password stored).
+
+
 [MIT License](http://opensource.org/licenses/mit-license.php)
 -------------------------------------------------------------
 Copyright (c) 2016 Shao-Chung Chen
