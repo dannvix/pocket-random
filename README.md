@@ -24,9 +24,9 @@ Usage
 3. Enjoy reading!!
 
 
-Note
-----
-Authorized Pocket credential would be stored in `~/.pocketrandom` (no password stored).
+Privacy
+-------
+Authorized Pocket credential is saved in `~/.pocketrandom` (no password stored).
 
 
 [MIT License](http://opensource.org/licenses/mit-license.php)
