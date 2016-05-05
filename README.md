@@ -9,12 +9,21 @@ Screenshot
 ![pocket-random screnshot](https://raw.github.com/dannvix/pocket-random/master/docs/screenshot.png)
 
 
-Dependencies
-------------
+Dependencies (Python)
+---------------------
 * Python 2.7 and later
 * Python packages
   - [`requests`](http://docs.python-requests.org/)
   - [`blessings`](https://github.com/erikrose/blessings) (optional)
+
+
+Dependencies (Golang)
+---------------------
+* Golang (we use `go1.3`)
+* Golang packages
+  - [`github.com/fatih/color`](https://github.com/fatih/color)
+  - [`github.com/toqueteos/webbrowser`](https://github.com/toqueteos/webbrowser)
+  - [`golang.org/x/crypto/ssh/terminal`](https://golang.org/x/crypto/ssh/terminal)
 
 
 Usage
