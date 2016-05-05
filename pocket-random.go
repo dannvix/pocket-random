@@ -242,7 +242,7 @@ func retrieveItems(cfg *UserConfig) []map[string]interface{} {
 
 func userInteractOnItem(cfg *UserConfig, item map[string]interface{}) {
 	for true {
-		fmt.Printf("Action[open(o), archive(a), delete(d), next(n), quit(q)] > ")
+		fmt.Printf("Action[help(h), o, a, f, d, n, q] > ")
 		userAction, err := bufio.NewReader(os.Stdin).ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
@@ -266,10 +266,22 @@ func userInteractOnItem(cfg *UserConfig, item map[string]interface{}) {
 		}
 
 		switch userAction {
+		case "h", "help":
+			fmt.Println(`
+help (h) — show this message
+open (o) — open the item in web browser
+archive (o) — archive the item
+favorite (f) — favorite the item
+delete (d) — delete the item
+next (n) — move to next item
+quit (q) — quit this program`)
 		case "o", "open":
 			webbrowser.Open(item["resolved_url"].(string))
 		case "a", "archive":
 			itemAction("archive")
+			return
+		case "f", "favorite":
+			itemAction("favorite")
 			return
 		case "d", "delete":
 			itemAction("delete")
@@ -310,6 +322,9 @@ func main() {
 			item_date := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
 
 			fmt.Println()
+			if item["favorite"] != "0" {
+				fmt.Println(color.RedString("★ FAVORITED"))
+			}
 			fmt.Printf("%s %s\n", color.YellowString(item_id), color.WhiteString(item_title))
 			fmt.Printf("%s\n", color.GreenString(item_url))
 			fmt.Printf("%s\n", color.BlueString(item_date))
