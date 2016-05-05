@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/toqueteos/webbrowser"
 	"io/ioutil"
 	"log"
@@ -213,7 +214,7 @@ func retrieveItems(cfg *UserConfig) []map[string]interface{} {
 
 	requestData := url.Values{
 		"detailType": {"simple"},
-		"count":      {"10"},
+		"count": {"10"},
 	}
 
 	body := requestPocketApi(cfg, "get", requestData)
@@ -289,10 +290,15 @@ func main() {
 			item := items[i]
 			itemUnixTime, _ := strconv.Atoi(item["time_added"].(string))
 
-			fmt.Println("")
-			fmt.Printf("[#%s] \"%s\"\n", item["item_id"], item["resolved_title"])
-			fmt.Printf("%s\n", item["resolved_url"])
-			fmt.Printf("Added %s\n", prettyDateSince(itemUnixTime))
+			item_id := fmt.Sprintf("[#%s]", item["item_id"])
+			item_title := fmt.Sprintf("\"%s\"", item["resolved_title"])
+			item_url := item["resolved_url"].(string)
+			item_date := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
+
+			fmt.Println()
+			fmt.Printf("%s %s\n", color.YellowString(item_id), color.WhiteString(item_title))
+			fmt.Printf("%s\n", color.GreenString(item_url))
+			fmt.Printf("%s\n", color.BlueString(item_date))
 
 			userInteractOnItem(cfg, item)
 		}
