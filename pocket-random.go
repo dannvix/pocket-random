@@ -222,7 +222,6 @@ func retrieveItems(cfg *UserConfig) []map[string]interface{} {
 
 	requestData := url.Values{
 		"detailType": {"simple"},
-		"count":      {"10"},
 	}
 
 	body := requestPocketApi(cfg, "get", requestData)
