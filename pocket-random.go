@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/toqueteos/webbrowser"
+	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -58,6 +59,13 @@ func prettyDateSince(unixTime int) string {
 		return fmt.Sprintf("%d years ago", int(diffDays/365))
 	}
 	return ""
+}
+
+func truncateString(input string, width int) string {
+	if len(input) > width {
+		return input[:width-1] + "…"
+	}
+	return input
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -214,7 +222,7 @@ func retrieveItems(cfg *UserConfig) []map[string]interface{} {
 
 	requestData := url.Values{
 		"detailType": {"simple"},
-		"count": {"10"},
+		"count":      {"10"},
 	}
 
 	body := requestPocketApi(cfg, "get", requestData)
@@ -281,6 +289,12 @@ func main() {
 	cfg := NewUserConfig().loadOrInitialize()
 	requestPermission(cfg)
 
+	// get console dimensions
+	consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		consoleWidth = 100 // default fallback
+	}
+
 	// retrieve and go through items
 	if cfg.ApiKey != "" && cfg.UserCode != "" && cfg.UserToken != "" {
 		fmt.Printf("Hello %s!\n", cfg.Username)
@@ -291,8 +305,9 @@ func main() {
 			itemUnixTime, _ := strconv.Atoi(item["time_added"].(string))
 
 			item_id := fmt.Sprintf("[#%s]", item["item_id"])
-			item_title := fmt.Sprintf("\"%s\"", item["resolved_title"])
-			item_url := item["resolved_url"].(string)
+			item_title := fmt.Sprintf("\"%s\"",
+				truncateString(item["resolved_title"].(string), consoleWidth-len("\"\"")-len(item_id)))
+			item_url := truncateString(item["resolved_url"].(string), consoleWidth)
 			item_date := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
 
 			fmt.Println()
