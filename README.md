@@ -3,6 +3,8 @@ Pocket-Random
 Too many saved items in Pocket?
 Randomly pick up something to read ... I'm feeling lucky!!
 
+Impementations in Python and in Golang are functionally equivalent.
+
 
 Screenshot
 ----------
