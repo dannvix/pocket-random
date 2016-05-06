@@ -348,7 +348,7 @@ func main() {
 			fmt.Fprintln(color.Output, color.RedString("★ FAVORITED"))
 		}
 		fmt.Fprintln(color.Output, color.YellowString(itemId)+" "+color.WhiteString(itemTitle))
-		fmt.Fprintln(color.Output, color.GreenString(itemUrl)) // itemUrl may contain '%xx' which can interferes fmt.Printf()
+		fmt.Fprintln(color.Output, color.GreenString(strings.Replace(itemUrl, "%", "%%", -1))) // `itemUrl` may contain '%xx' which can be considered as a format string
 		fmt.Fprintln(color.Output, color.CyanString(itemDate)+" | "+color.MagentaString(itemWordCount))
 
 		userInteractOnItem(cfg, item)
