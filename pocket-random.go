@@ -218,19 +218,37 @@ func requestPermission(cfg *UserConfig) {
 }
 
 func retrieveItems(cfg *UserConfig) []map[string]interface{} {
-	fmt.Printf("Retrieving items from Pocket... ")
+	respChnl := make(chan map[string]interface{}, 0)
 
-	requestData := url.Values{
-		"detailType": {"simple"},
-	}
+	go func() {
+		requestData := url.Values{
+			"detailType": {"simple"},
+		}
+		body := requestPocketApi(cfg, "get", requestData)
+		respChnl <- body
+	}()
 
-	body := requestPocketApi(cfg, "get", requestData)
+	// wait for items, and animate the waiting message
+	var body map[string]interface{}
+	func() {
+		for true {
+			for _, slash := range "|/-\\" {
+				fmt.Printf("Retrieving items from Pocket ... %c\r", slash)
+				select {
+				case body = <-respChnl:
+					return
+				case <-time.After(250 * time.Millisecond):
+					continue
+				}
+			}
+		}
+	}()
+
 	var items []map[string]interface{}
 	for _, item := range body["list"].(map[string]interface{}) {
 		items = append(items, item.(map[string]interface{}))
 	}
-
-	fmt.Printf("%d items retrieved!\n", len(items))
+	fmt.Printf("Retrieving items from Pocket... %d items retrieved!\n", len(items))
 
 	// shuffle by randomly swap items
 	for i := range items {
@@ -248,7 +266,7 @@ func userInteractOnItem(cfg *UserConfig, item map[string]interface{}) {
 			log.Fatal(err)
 			os.Exit(1)
 		}
-		userAction = strings.Trim(strings.ToLower(userAction), " \n")
+		userAction = strings.Trim(strings.ToLower(userAction), " \r\n")
 
 		itemAction := func(action string) {
 			actions, err := json.Marshal([]map[string]string{
@@ -282,7 +300,6 @@ quit (q) — quit this program`)
 			return
 		case "f", "favorite":
 			itemAction("favorite")
-			return
 		case "d", "delete":
 			itemAction("delete")
 			return
@@ -300,36 +317,39 @@ func main() {
 	cfg := NewUserConfig().loadOrInitialize()
 	requestPermission(cfg)
 
-	// get console dimensions
-	consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		consoleWidth = 100 // default fallback
+	// retrieve and go through items
+	if cfg.ApiKey == "" || cfg.UserCode == "" || cfg.UserToken == "" {
+		log.Fatalf("Configuration error, api_key=[%s], user_code=[%s], user_token=[%s]",
+			cfg.ApiKey, cfg.UserCode, cfg.UserToken)
 	}
 
-	// retrieve and go through items
-	if cfg.ApiKey != "" && cfg.UserCode != "" && cfg.UserToken != "" {
-		fmt.Printf("Hello %s!\n", cfg.Username)
+	fmt.Printf("Hello %s!\n", cfg.Username)
 
-		items := retrieveItems(cfg)
-		for i := range items {
-			item := items[i]
-			itemUnixTime, _ := strconv.Atoi(item["time_added"].(string))
+	items := retrieveItems(cfg)
+	for i := range items {
+		item := items[i]
+		itemUnixTime, _ := strconv.Atoi(item["time_added"].(string))
 
-			item_id := fmt.Sprintf("[#%s]", item["item_id"])
-			item_title := fmt.Sprintf("\"%s\"",
-				truncateString(item["resolved_title"].(string), consoleWidth-len("\"\"")-len(item_id)))
-			item_url := truncateString(item["resolved_url"].(string), consoleWidth)
-			item_date := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
-
-			fmt.Println()
-			if item["favorite"] != "0" {
-				fmt.Println(color.RedString("★ FAVORITED"))
-			}
-			fmt.Printf("%s %s\n", color.YellowString(item_id), color.WhiteString(item_title))
-			fmt.Printf("%s\n", color.GreenString(item_url))
-			fmt.Printf("%s\n", color.BlueString(item_date))
-
-			userInteractOnItem(cfg, item)
+		consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd()))
+		if err != nil {
+			consoleWidth = 80 // default fallback
 		}
+
+		item_id := fmt.Sprintf("[#%s]", item["item_id"])
+		item_title := fmt.Sprintf("\"%s\"",
+			truncateString(item["resolved_title"].(string), consoleWidth-len("\"\"")-len(item_id)-1))
+		item_url := truncateString(item["resolved_url"].(string), consoleWidth-1)
+		item_date := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
+
+		// use `fmt.Fprintln(color.Output, …)` to support Windows
+		fmt.Println()
+		if item["favorite"] != "0" {
+			fmt.Fprintln(color.Output, color.RedString("★ FAVORITED"))
+		}
+		fmt.Fprintln(color.Output, color.YellowString(item_id)+" "+color.WhiteString(item_title))
+		fmt.Fprintln(color.Output, color.GreenString(item_url)) // item_url contains '%xx' which can interferes fmt.Printf()
+		fmt.Fprintln(color.Output, color.CyanString(item_date))
+
+		userInteractOnItem(cfg, item)
 	}
 }
