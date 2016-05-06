@@ -335,20 +335,21 @@ func main() {
 			consoleWidth = 80 // default fallback
 		}
 
-		item_id := fmt.Sprintf("[#%s]", item["item_id"])
-		item_title := fmt.Sprintf("\"%s\"",
-			truncateString(item["resolved_title"].(string), consoleWidth-len("\"\"")-len(item_id)-1))
-		item_url := truncateString(item["resolved_url"].(string), consoleWidth-1)
-		item_date := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
+		itemId := fmt.Sprintf("[#%s]", item["item_id"])
+		itemTitle := fmt.Sprintf("\"%s\"",
+			truncateString(item["resolved_title"].(string), consoleWidth-len("\"\"")-len(itemId)-1))
+		itemUrl := truncateString(item["resolved_url"].(string), consoleWidth-1)
+		itemDate := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
+		itemWordCount := fmt.Sprintf("~ %s words", item["word_count"])
 
 		// use `fmt.Fprintln(color.Output, …)` to support Windows
 		fmt.Println()
 		if item["favorite"] != "0" {
 			fmt.Fprintln(color.Output, color.RedString("★ FAVORITED"))
 		}
-		fmt.Fprintln(color.Output, color.YellowString(item_id)+" "+color.WhiteString(item_title))
-		fmt.Fprintln(color.Output, color.GreenString(item_url)) // item_url contains '%xx' which can interferes fmt.Printf()
-		fmt.Fprintln(color.Output, color.CyanString(item_date))
+		fmt.Fprintln(color.Output, color.YellowString(itemId)+" "+color.WhiteString(itemTitle))
+		fmt.Fprintln(color.Output, color.GreenString(itemUrl)) // itemUrl may contain '%xx' which can interferes fmt.Printf()
+		fmt.Fprintln(color.Output, color.CyanString(itemDate)+" | "+color.MagentaString(itemWordCount))
 
 		userInteractOnItem(cfg, item)
 	}
