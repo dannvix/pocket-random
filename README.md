@@ -3,24 +3,13 @@ Pocket-Random
 Too many saved items in Pocket?
 Randomly pick up something to read ... I'm feeling lucky!!
 
-Impementations in Python and in Golang are functionally equivalent.
-
-
 Screenshot
 ----------
 ![pocket-random screnshot](https://raw.github.com/dannvix/pocket-random/master/docs/screenshot.png)
 
 
-Dependencies (Python)
----------------------
-* Python 2.7 and later
-* Python packages
-  - [`requests`](http://docs.python-requests.org/)
-  - [`blessings`](https://github.com/erikrose/blessings) (optional)
-
-
-Dependencies (Golang)
----------------------
+Dependencies
+------------
 * Golang (we use `go1.3`)
 * Golang packages
   - [`github.com/fatih/color`](https://github.com/fatih/color)
@@ -38,6 +27,21 @@ Usage
 Privacy
 -------
 Authorized Pocket credential is saved in `~/.pocketrandom` (no password stored).
+
+Below shows an example of `~/.pocketrandom`.
+```js
+{
+    "username": "dannvix"
+    "api_key": "42313-29d3g198f7c3da1d6715ca9d3",
+    "user_code": "92d6bac3-1234-79ad-b3ca-f5c36d",
+    "user_token": "0809abcd-4426-9a4b-5566-17d349",
+}
+```
+
+
+Note
+----
+Implementation in Python has been deprecated.
 
 
 [MIT License](http://opensource.org/licenses/mit-license.php)
