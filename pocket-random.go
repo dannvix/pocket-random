@@ -335,10 +335,18 @@ func main() {
 			consoleWidth = 80 // default fallback
 		}
 
+		var itemTitle string
+		switch {
+		case item["resolved_title"] != nil && item["resolved_title"] != "":
+			itemTitle = item["resolved_title"].(string)
+		case item["given_title"] != nil && item["given_title"] != "":
+			itemTitle = item["given_title"].(string)
+		}
+
 		itemId := fmt.Sprintf("[#%s]", item["item_id"])
-		itemTitle := fmt.Sprintf("\"%s\"",
+		itemTitle = fmt.Sprintf("\"%s\"",
 			truncateString(item["resolved_title"].(string), consoleWidth-len("\"\"")-len(itemId)-1))
-		itemUrl := truncateString(item["resolved_url"].(string), consoleWidth-1)
+		itemUrl := truncateString(itemTitle, consoleWidth-1)
 		itemDate := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
 		itemWordCount := fmt.Sprintf("~ %s words", item["word_count"])
 
