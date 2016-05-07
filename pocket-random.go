@@ -344,9 +344,9 @@ func main() {
 		}
 
 		itemId := fmt.Sprintf("[#%s]", item["item_id"])
-		itemTitle = fmt.Sprintf("\"%s\"",
-			truncateString(item["resolved_title"].(string), consoleWidth-len("\"\"")-len(itemId)-1))
-		itemUrl := truncateString(itemTitle, consoleWidth-1)
+		itemTitle = fmt.Sprintf("\"%s\"", truncateString(
+			item["resolved_title"].(string), consoleWidth-len("\"\"")-len(itemId)-1))
+		itemUrl := truncateString(item["resolved_url"], consoleWidth-1)
 		itemDate := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
 		itemWordCount := fmt.Sprintf("~ %s words", item["word_count"])
 
