@@ -330,9 +330,9 @@ func main() {
 		item := items[i]
 		itemUnixTime, _ := strconv.Atoi(item["time_added"].(string))
 
-		consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd()))
+		termWidth, _, err := terminal.GetSize(int(os.Stdout.Fd()))
 		if err != nil {
-			consoleWidth = 80 // default fallback
+			termWidth = 80 // default fallback
 		}
 
 		var itemTitle string
@@ -344,9 +344,8 @@ func main() {
 		}
 
 		itemId := fmt.Sprintf("[#%s]", item["item_id"])
-		itemTitle = fmt.Sprintf("\"%s\"", truncateString(
-			item["resolved_title"].(string), consoleWidth-len("\"\"")-len(itemId)-1))
-		itemUrl := truncateString(item["resolved_url"], consoleWidth-1)
+		itemTitle = fmt.Sprintf("\"%s\"", truncateString(itemTitle, termWidth-len("\"\"")-len(itemId)-1))
+		itemUrl := truncateString(item["resolved_url"].(string), consoleWidth-1)
 		itemDate := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
 		itemWordCount := fmt.Sprintf("~ %s words", item["word_count"])
 
