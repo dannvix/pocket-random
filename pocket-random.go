@@ -251,9 +251,12 @@ func retrieveItems(cfg *UserConfig) []map[string]interface{} {
 	fmt.Printf("Retrieving items from Pocket... %d items retrieved!\n", len(items))
 
 	// shuffle by randomly swap items
-	for i := range items {
-		j := rand.Intn(len(items))
-		items[i], items[j] = items[j], items[i]
+	shuffleRounds := rand.Intn(10)
+	for sr := 0; sr < shuffleRounds; sr++ {
+		for i := range items {
+			j := rand.Intn(len(items))
+			items[i], items[j] = items[j], items[i]
+		}
 	}
 	return items
 }
