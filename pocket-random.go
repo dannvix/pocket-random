@@ -359,7 +359,7 @@ func main() {
 		// format output fields
 		itemId := fmt.Sprintf("[#%s]", item["item_id"])
 		itemTitle = fmt.Sprintf("\"%s\"", truncateString(itemTitle, termWidth-len("\"\"")-len(itemId)-1))
-		itemUrl := truncateString(itemUrl, termWidth-1)
+		itemUrl = truncateString(itemUrl, termWidth-1)
 		itemDate := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
 		itemWordCount := fmt.Sprintf("~ %s words", item["word_count"])
 
