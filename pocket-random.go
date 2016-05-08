@@ -338,6 +338,7 @@ func main() {
 			termWidth = 80 // default fallback
 		}
 
+		// `item["resolved_title"]` can be nil
 		var itemTitle string
 		switch {
 		case item["resolved_title"] != nil && item["resolved_title"] != "":
@@ -346,13 +347,23 @@ func main() {
 			itemTitle = item["given_title"].(string)
 		}
 
+		// `item["resolved_url"]` can be nil
+		var itemUrl string
+		switch {
+		case item["resolved_url"] != nil && item["resovled_url"] != "":
+			itemUrl = item["resolved_url"].(string)
+		case item["given_url"] != nil && item["given_url"] != "":
+			itemUrl = item["given_url"].(string)
+		}
+
+		// format output fields
 		itemId := fmt.Sprintf("[#%s]", item["item_id"])
 		itemTitle = fmt.Sprintf("\"%s\"", truncateString(itemTitle, termWidth-len("\"\"")-len(itemId)-1))
-		itemUrl := truncateString(item["resolved_url"].(string), termWidth-1)
+		itemUrl := truncateString(itemUrl, termWidth-1)
 		itemDate := fmt.Sprintf("Added %s", prettyDateSince(itemUnixTime))
 		itemWordCount := fmt.Sprintf("~ %s words", item["word_count"])
 
-		// use `fmt.Fprintln(color.Output, …)` to support Windows
+		// colorize and print output fields; use `fmt.Fprintln(color.Output, …)` to support Windows
 		fmt.Println()
 		if item["favorite"] != "0" {
 			fmt.Fprintln(color.Output, color.RedString("★ FAVORITED"))
