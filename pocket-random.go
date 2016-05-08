@@ -341,10 +341,10 @@ func main() {
 		// `item["resolved_title"]` can be nil
 		var itemTitle string
 		switch {
-		case item["resolved_title"] != nil && item["resolved_title"] != "":
-			itemTitle = item["resolved_title"].(string)
 		case item["given_title"] != nil && item["given_title"] != "":
 			itemTitle = item["given_title"].(string)
+		case item["resolved_title"] != nil && item["resolved_title"] != "":
+			itemTitle = item["resolved_title"].(string)
 		}
 
 		// `item["resolved_url"]` can be nil
