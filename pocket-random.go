@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/toqueteos/webbrowser"
@@ -249,15 +250,6 @@ func retrieveItems(cfg *UserConfig) []map[string]interface{} {
 		items = append(items, item.(map[string]interface{}))
 	}
 	fmt.Printf("Retrieving items from Pocket... %d items retrieved!\n", len(items))
-
-	// shuffle by randomly swap items
-	shuffleRounds := rand.Intn(10)
-	for sr := 0; sr < shuffleRounds; sr++ {
-		for i := range items {
-			j := rand.Intn(len(items))
-			items[i], items[j] = items[j], items[i]
-		}
-	}
 	return items
 }
 
@@ -317,18 +309,65 @@ quit (q) — quit this program`)
 ////////////////////////////////////////////////////////////////////////////////
 
 func main() {
+	// handle command-line arguments
+	var order string
+	flag.StringVar(&order, "order", "random", "oldest, latest, random")
+	flag.Parse()
+
+	if (order != "oldest") && (order != "latest") && (order != "random") {
+		order = "random"
+	}
+
+	// assure authentication
 	cfg := NewUserConfig().loadOrInitialize()
 	requestPermission(cfg)
 
-	// retrieve and go through items
 	if cfg.ApiKey == "" || cfg.UserCode == "" || cfg.UserToken == "" {
 		log.Fatalf("Configuration error, api_key=[%s], user_code=[%s], user_token=[%s]",
 			cfg.ApiKey, cfg.UserCode, cfg.UserToken)
 	}
-
 	fmt.Printf("Hello %s!\n", cfg.Username)
 
+	// retrieve items and sort them
 	items := retrieveItems(cfg)
+
+	switch order {
+	case "random":
+		// shuffle by randomly swap items
+		shuffleRounds := rand.Intn(10)
+		for sr := 0; sr < shuffleRounds; sr++ {
+			for i := range items {
+				j := rand.Intn(len(items))
+				items[i], items[j] = items[j], items[i]
+			}
+		}
+	case "oldest":
+		// FIXME: replace with `sort.Sort` with custom `sort.Interface (Len, Swap, Less)`
+		// sort from old to new
+		for i := 0; i < len(items); i++ {
+			for j := i + 1; j < len(items); j++ {
+				iAddedAt, _ := strconv.Atoi(items[i]["time_added"].(string))
+				jAddedAt, _ := strconv.Atoi(items[j]["time_added"].(string))
+				if iAddedAt > jAddedAt {
+					items[i], items[j] = items[j], items[i]
+				}
+			}
+		}
+	case "latest":
+		// FIXME: replace with `sort.Sort` with custom `sort.Interface (Len, Swap, Less)`
+		// sort from new to old
+		for i := 0; i < len(items); i++ {
+			for j := i + 1; j < len(items); j++ {
+				iAddedAt, _ := strconv.Atoi(items[i]["time_added"].(string))
+				jAddedAt, _ := strconv.Atoi(items[j]["time_added"].(string))
+				if iAddedAt < jAddedAt {
+					items[i], items[j] = items[j], items[i]
+				}
+			}
+		}
+	}
+
+	// enumerate items with user interaction
 	for i := range items {
 		item := items[i]
 		itemUnixTime, _ := strconv.Atoi(item["time_added"].(string))
