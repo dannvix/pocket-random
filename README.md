@@ -44,6 +44,11 @@ Note
 Implementation in Python has been deprecated.
 
 
+Troubleshooting Tips
+--------------------
+1. When you try `pocket-add` and get `POST 'https://getpocket.com/v3/add' failed, StatusCode=[500], X-Error=[Pocket server error.], X-Error-Code=[198]`, it probably means your Pocket App (`api_key`) does not have the required *Add* permission.  Unfortunately it seems the Pocket App permission cannot be modified once it's created.  Workaround is to create another app on [Pocket Developer Site](https://getpocket.com/developer/apps/)
+
+
 [MIT License](http://opensource.org/licenses/mit-license.php)
 -------------------------------------------------------------
 Copyright (c) 2016 Shao-Chung Chen
