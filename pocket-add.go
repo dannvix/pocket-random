@@ -245,10 +245,17 @@ func main() {
 
 	item := addItemWithUrl(cfg, itemUrl)
 
-	itemId := item["item_id"].(string)
-	itemResolvedUrl := item["resolved_normal_url"].(string)
-	itemTitle := item["title"].(string)
-	itemExcerpt := item["excerpt"].(string)
+	getItemAttrib := func(attribName string) string {
+		// attributes of the Pocket item are not always available
+		if item[attribName] != nil {
+			return item[attribName].(string)
+		}
+		return "(nil)"
+	}
+	itemId := getItemAttrib("item_id")
+	itemResolvedUrl := getItemAttrib("resolved_normal_url")
+	itemTitle := getItemAttrib("title")
+	itemExcerpt := getItemAttrib("excerpt")
 
 	writeStringWithPrefixAndTruncate := func(prefix string, arg string) {
 		fmtStr := fmt.Sprintf("%s: %%s\n", prefix)
